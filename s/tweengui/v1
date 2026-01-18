@@ -1,0 +1,92 @@
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+
+local Waypoints = {
+	{ name = "wp",  pos = Vector3.new(117.45062255859375, 3.2369885444641113, -19.798574447631836) },
+	{ name = "wp1", pos = Vector3.new(546.8670654296875, -2.763000011444092, 32.55719757080078) },
+	{ name = "wp2", pos = Vector3.new(751.9878540039062, -2.763000011444092, 3.381190776824951) },
+	{ name = "wp3", pos = Vector3.new(1075.3466796875, -2.763000011444092, 40.64546203613281) },
+	{ name = "wp4", pos = Vector3.new(1574.09521484375, -2.763000011444092, 23.663410186767578) },
+	{ name = "wp5", pos = Vector3.new(2257.775390625, -2.763000011444092, 14.848767280578613) },
+	{ name = "wp6", pos = Vector3.new(2600.181884765625, -2.763000011444092, -6.65406608581543) },
+}
+
+local function twp(pos)
+	local char = player.Character or player.CharacterAdded:Wait()
+	local hrp = char:WaitForChild("HumanoidRootPart")
+
+	TweenService:Create(
+		hrp,
+    TweenInfo.new(0.5, Enum.EasingStyle.Linear),
+		{ CFrame = CFrame.new(pos) }
+	):Play()
+end
+
+local gui = Instance.new("ScreenGui")
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame")
+frame.Parent = gui
+frame.Size = UDim2.new(0, 220, 0, 260)
+frame.Position = UDim2.new(0.5, -110, 0.5, -130)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.Active = true
+frame.BorderSizePixel = 0
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
+
+local dragging, dragStart, startPos, dragInput
+
+frame.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+	or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = true
+		dragStart = input.Position
+		startPos = frame.Position
+
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+frame.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement
+	or input.UserInputType == Enum.UserInputType.Touch then
+		dragInput = input
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if dragging and input == dragInput then
+		local delta = input.Position - dragStart
+		frame.Position = UDim2.new(
+			startPos.X.Scale, startPos.X.Offset + delta.X,
+			startPos.Y.Scale, startPos.Y.Offset + delta.Y
+		)
+	end
+end)
+
+for i, wp in ipairs(Waypoints) do
+	local btn = Instance.new("TextButton")
+	btn.Parent = frame
+	btn.Size = UDim2.new(1, -20, 0, 28)
+	btn.Position = UDim2.new(0, 10, 0, 10 + ((i - 1) * 32))
+	btn.Text = wp.name
+	btn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btn.BorderSizePixel = 0
+	btn.Font = Enum.Font.Gotham
+	btn.TextSize = 14
+	btn.Active = true
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+
+	btn.MouseButton1Click:Connect(function()
+		twp(wp.pos)
+	end)
+    end
