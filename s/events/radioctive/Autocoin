@@ -1,0 +1,31 @@
+local target = workspace.EventParts
+local Players = game:GetService("Players")
+
+local player = Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local hrp = char:WaitForChild("HumanoidRootPart")
+
+local touched = {}
+
+local function touchModel(model)
+	
+	
+
+	for _, part in ipairs(model:GetDescendants()) do
+		if part:IsA("BasePart") then
+			firetouchinterest(hrp, part, 0)
+			firetouchinterest(hrp, part, 1)
+			break -- ONLY need one touch
+		end
+	end
+end
+while task.wait(2) do
+-- existing coins
+for _, model in ipairs(target:GetChildren()) do
+	if model:IsA("Model") then
+		touchModel(model)
+	end
+end
+end
+
+--
