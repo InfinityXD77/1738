@@ -1,66 +1,146 @@
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
-local StarterGui = game:GetService("StarterGui")
 local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-local UIS = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-
+local StarterGui = game:GetService("StarterGui")
 local player = Players.LocalPlayer
-local folder = workspace:WaitForChild("ActiveBrainrots"):WaitForChild("Secret")
 
 local Window = Rayfield:CreateWindow({
-    Name = "1738 Hub",
-    Icon = 0,
-    LoadingTitle = "Loading...",
-    LoadingSubtitle = "made by yt-@Opgamer73431",
-    ShowText = "1738",
-    Theme = "Default",
-    ToggleUIKeybind = "K",
-    ConfigurationSaving = {
-        Enabled = true,
-        FolderName = nil,
-        FileName = "1738 Hub"
-    },
-    KeySystem = false
+	Name = "1738 Hub",
+	Icon = 0,
+	LoadingTitle = "Loading...",
+	LoadingSubtitle = "made by yt-@Opgamer73431",
+	ShowText = "1738",
+	Theme = "Default",
+	ToggleUIKeybind = "K",
+	ConfigurationSaving = {
+		Enabled = true,
+		FileName = "1738 Hub"
+	}
 })
 
-local Tab = Window:CreateTab("Main","box")
-Tab:CreateSection("Spawn Alerts")
+-- MAIN TAB
+local MainTab = Window:CreateTab("Main","box")
+MainTab:CreateSection("Hitbox")
+
+local hv = 20
+local hitboxEnabled = false
+
+MainTab:CreateToggle({
+	Name = "Hitbox Toggle",
+	CurrentValue = false,
+	Flag = "hitboxtoggle",
+	Callback = function(Value)
+		hitboxEnabled = Value
+		if Value then
+			_G.HeadSize = hv
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/InfinityXD77/1738/main/s/hitbox/script.lua"))()
+		end
+	end
+})
+
+MainTab:CreateSlider({
+	Name = "Hitbox Value",
+	Range = {0,25},
+	Increment = 1,
+	CurrentValue = hv,
+	Flag = "hitboxvalue",
+	Callback = function(Value)
+		hv = Value
+		if hitboxEnabled then
+			_G.HeadSize = hv
+		end
+	end
+})
+
+-- BRAINROT NOTIFIER
+MainTab:CreateSection("Brainrot Notifier")
+
+local notifierConn
+local folder = workspace:WaitForChild("ActiveBrainrots"):WaitForChild("Secret")
 
 local function notify(text)
-    Rayfield:Notify({
-        Title = "Spawn Alert",
-        Content = text,
-        Duration = 5,
-        Image = "bell-ring"
-    })
+	pcall(function()
+		StarterGui:SetCore("SendNotification", {
+			Title = "Spawn Alert",
+			Text = text,
+			Duration = 5
+		})
+	end)
 end
 
 local function checkName(name)
-    local lower = string.lower(name)
-    if string.find(lower, "67") then notify("rainbow 67 spawned") end
-    if string.find(lower, "frago") then notify("frago la la la spawned") end
-    if string.find(lower, "aura") then notify("aura farma spawned") end
-    if string.find(lower, "eek") then notify("eek eek eek sahur spawned") end
+	local n = string.lower(name)
+	if n:find("67") then notify("Rainbow 67 spawned") end
+	if n:find("frago") then notify("Frago La La La spawned") end
+	if n:find("aura") then notify("Aura Farma spawned") end
 end
 
-for _, obj in ipairs(folder:GetChildren()) do
-    local inner = obj:FindFirstChildWhichIsA("Model")
-    if inner then
-        checkName(inner.Name)
-    end
-end
+MainTab:CreateToggle({
+	Name = "Notify if brainrot spawn",
+	CurrentValue = false,
+	Flag = "brainrotnotify",
+	Callback = function(Value)
+		if notifierConn then
+			notifierConn:Disconnect()
+			notifierConn = nil
+		end
 
-folder.ChildAdded:Connect(function(obj)
-    local inner = obj:FindFirstChildWhichIsA("Model")
-    if inner then
-        checkName(inner.Name)
-    end
-end)
+		if Value then
+			for _, obj in ipairs(folder:GetChildren()) do
+				local m = obj:FindFirstChildWhichIsA("Model")
+				if m then checkName(m.Name) end
+			end
+
+			notifierConn = folder.ChildAdded:Connect(function(obj)
+				local m = obj:WaitForChild(obj:FindFirstChildWhichIsA("Model") and obj:FindFirstChildWhichIsA("Model").Name or "",2)
+				m = m or obj:FindFirstChildWhichIsA("Model")
+				if m then checkName(m.Name) end
+			end)
+		end
+	end
+})
+
+local Dropdown = Tab:CreateDropdown({
+   Name = "Which brainrot to notify",
+   Options = {"Coming Soon..."},
+   CurrentOption = {"Option 1"},
+   MultipleOptions = false,
+   Flag = "notifybrainrotselection", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Options)
+   -- The function that takes place when the selected option is changed
+   -- The variable (Options) is a table of strings for the current selected options
+   end,
+})
+
+-- GAPS TAB
+local GapsTab = Window:CreateTab("Gaps","navigation-2")
+GapsTab:CreateSection("Tweening")
+
+GapsTab:CreateButton({
+	Name = "Variant 1",
+	Callback = function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/InfinityXD77/1738/main/s/tweengui/v1.lua"))()
+	end
+})
+
+GapsTab:CreateButton({
+	Name = "Variant 2",
+	Callback = function()
+		Rayfield:Notify({
+			Title = "In Progress...",
+			Content = "Releasing soon",
+			Duration = 6.5,
+			Image = "bell-ring"
+		})
+	end
+})
 
 Rayfield:Notify({
-    Title = "1738 Hub Loaded!!",
+	Title = "1738 Hub Loaded!!",
+	Content = "Enjoy....",
+	Duration = 6.5,
+	Image = "bell-ring"
+})    Title = "1738 Hub Loaded!!",
     Content = "Enjoy....",
     Duration = 6.5,
     Image = "bell-ring"
