@@ -31,10 +31,65 @@ ping = math.floor(ping * 1000)
 if ping <= TARGET_PING then
 	StarterGui:SetCore("SendNotification", {
 		Title = "Server Hopper",
-		Text = "Your ping is already good! (" .. ping .. "ms)",
+		Text = "Ping is already good! (" .. ping .. "ms)",
 		Duration = 5
 	})
 	return
+end
+
+local response
+
+StarterGui:SetCore("SendNotification", {
+	Title = "Server Hopper",
+	Text = "Wanna hop to a good ping server?\nMay take some time.",
+	Duration = 15,
+	Button1 = "Yh",
+	Button2 = "Nah im good",
+	Callback = function(btn)
+		response = btn
+	end
+})
+
+repeat task.wait() until response
+
+if response ~= "Yh" then
+	return
+end
+
+local queue = queue_on_teleport or queueonteleport or (syn and syn.queue_on_teleport)
+
+if queue then
+	queue([[
+loadstring(game:HttpGet("https://raw.githubusercontent.com/InfinityXD77/1738/refs/heads/main/aaaa"))()
+]])
+end
+
+StarterGui:SetCore("SendNotification", {
+	Title = "Server Hopper",
+	Text = "Current ping: " .. ping .. "ms\nSearching...",
+	Duration = 5
+})
+
+local success, data = pcall(function()
+	return HttpService:JSONDecode(
+		game:HttpGet(
+			"https://games.roblox.com/v1/games/" ..
+			PlaceId ..
+			"/servers/Public?sortOrder=Asc&limit=100"
+		)
+	)
+end)
+
+if not success or not data or not data.data then
+	return
+end
+
+for _, server in ipairs(data.data) do
+	if server.id ~= game.JobId and server.playing < server.maxPlayers then
+		TeleportService:TeleportToPlaceInstance(PlaceId, server.id)
+		break
+	end
+end	return
 end
 
 local response
